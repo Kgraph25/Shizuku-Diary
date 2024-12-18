@@ -15,30 +15,7 @@ const app = new Application({
   view: canvas,
 });
 
-const model = await Live2DModel.from('live2d/shizuku.model.json', {
-  autoInteract: false,
-  motionPreload: MotionPreloadStrategy.IDLE
-});
-
-app.stage.addChild(model);
-
-let mousestate = false;
-canvas.addEventListener('pointerdown', (event) => model.tap(event.clientX, event.clientY));
-canvas.addEventListener('pointerenter', () => (mousestate = true));
-canvas.addEventListener('pointerleave', () => {
-  model.internalModel.focusController.focus(0, 0);
-  mousestate = false;
-});
-
-canvas.addEventListener('pointermove', ({ clientX, clientY }) => {
-  if (mousestate) model.focus(clientX, clientY);
-});
-
-// interaction
-model.on('hit', (hitAreas) => {
-  if (hitAreas.includes('head')) model.motion('shake', 1);
-});
-
+let model: Live2DModel;
 const expressions = { happy: 1, sad: 2, angry: 3 };
 const motions: {[key: string]: Array<[string, number]>} = {
   talk: [
@@ -69,51 +46,82 @@ const motions: {[key: string]: Array<[string, number]>} = {
   ]
 };
 
-// TODO: it has to be done twice, idk why
-fitModel();
-setTimeout(() => fitModel(), 250);
+Live2DModel.from('live2d/shizuku.model.json', {
+  autoInteract: false,
+  motionPreload: MotionPreloadStrategy.IDLE
+}).then(loadedModel => {
+  model = loadedModel;
+  app.stage.addChild(model);
 
-function fitModel() {
-  const breakpoint = {
-    md: window.innerWidth > 720 && window.innerWidth < 1000,
-    lg: window.innerWidth >= 1000
-  };
+  let mousestate = false;
+  canvas.addEventListener('pointerdown', (event) => model.tap(event.clientX, event.clientY));
+  canvas.addEventListener('pointerenter', () => (mousestate = true));
+  canvas.addEventListener('pointerleave', () => {
+    model.internalModel.focusController.focus(0, 0);
+    mousestate = false;
+  });
 
-  // set canvas and renderer before model
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  // width doesnt matter on md++
-  if (!breakpoint.md && !breakpoint.lg) {
-    app.renderer.screen.width = window.innerWidth;
+  canvas.addEventListener('pointermove', ({ clientX, clientY }) => {
+    if (mousestate) model.focus(clientX, clientY);
+  });
+
+  // interaction
+  model.on('hit', (hitAreas) => {
+    if (hitAreas.includes('head')) model.motion('shake', 1);
+  });
+
+
+  function fitModel() {
+    if (!model) return;
+    const breakpoint = {
+      md: window.innerWidth > 720 && window.innerWidth < 1000,
+      lg: window.innerWidth >= 1000
+    };
+
+    // set canvas and renderer before model
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    // width doesnt matter on md++
+    if (!breakpoint.md && !breakpoint.lg) {
+      app.renderer.screen.width = window.innerWidth;
+    }
+    app.renderer.screen.height = window.innerHeight;
+
+    const anchor = {
+      x: breakpoint.lg ? 1 : 0.5,
+      y: 0.85
+    };
+
+    const scale = {
+      x: breakpoint.lg ? 0.4 : breakpoint.md ? 0.35 : 0.25,
+      y: breakpoint.lg ? 0.475 : breakpoint.md ? 0.425 : 0.3
+    };
+
+    const width = breakpoint.md
+      ? model.width / 2.35
+      : breakpoint.lg
+        ? model.width
+        : app.renderer.screen.width / 2;
+
+    const height = breakpoint.md || breakpoint.lg
+      ? app.renderer.screen.height
+      : model.height;
+
+    model.anchor.set(anchor.x, anchor.y);
+    model.scale.set(scale.x, scale.y);
+    model.x = width;
+    model.y = height;
   }
-  app.renderer.screen.height = window.innerHeight;
+  fitModel();
+  setTimeout(() => {
+    if (model) {
+      fitModel();
+    }
+  }, 250);
 
-  const anchor = {
-    x: breakpoint.lg ? 1 : 0.5,
-    y: 0.85
-  };
 
-  const scale = {
-    x: breakpoint.lg ? 0.4 : breakpoint.md ? 0.35 : 0.25,
-    y: breakpoint.lg ? 0.475 : breakpoint.md ? 0.425 : 0.3
-  };
-
-  const width = breakpoint.md
-    ? model.width / 2.35
-    : breakpoint.lg
-      ? model.width
-      : app.renderer.screen.width / 2;
-
-  const height = breakpoint.md || breakpoint.lg
-    ? app.renderer.screen.height
-    : model.height;
-
-  model.anchor.set(anchor.x, anchor.y);
-  model.scale.set(scale.x, scale.y);
-  model.x = width;
-  model.y = height;
-}
-
-window.addEventListener('resize', fitModel);
+  window.addEventListener('resize', fitModel);
+  document.getElementById('loader')!.style.display = 'none';
+});
 
 export default { app, expressions, model, motions };

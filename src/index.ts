@@ -1,14 +1,32 @@
 import { CustomWindow } from './types';
 import Live2D from './Live2D';
 import './Message.ts';
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 
-
-//import NLP from './NLP';
-//import SpeechRecognition from './SpeechRecognition';
 // Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+};
 
 // Initialize Firebase
+let app;
+try {
+  app = initializeApp(firebaseConfig);
+  console.log('Firebase initialized successfully');
+} catch (error) {
+  console.error('Firebase initialization failed', error);
+  document.getElementById('loader')!.textContent = 'Firebase initialization failed';
+}
+
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
 declare const window: CustomWindow;
 
@@ -19,7 +37,10 @@ window.Modules = {
   
 };
 
-document.getElementById('loader')!.style.display = 'none';
+if (app) {
+  document.getElementById('loader')!.style.display = 'none';
+}
+
 
 // TODO: better help pleasze
 document.getElementById('help')!.onclick = () => alert(
@@ -35,3 +56,12 @@ document.getElementById('help')!.onclick = () => alert(
   '> 最後に <\n' +
   'このプロジェクトにおいていちばん大切なことは\n皆さんには就職活動は小さな成長の積み重ねで大きな結果につながることを感じてもらいたいところにあります。\nプロジェクトメンバー一同はあなたの就職活動が輝きある試みの一つになれることを願っております！！！'
 );
+
+document.getElementById('login')!.onclick = async () => {
+  try {
+    await signInWithPopup(auth, provider);
+    console.log('ログイン成功');
+  } catch (error) {
+    console.error('ログイン失敗', error);
+  }
+};
