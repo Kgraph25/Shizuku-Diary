@@ -61,6 +61,7 @@ document.getElementById('login')!.onclick = async () => {
   try {
     await signInWithPopup(auth, provider);
     console.log('ログイン成功');
+    document.getElementById('login')!.querySelector('h1')!.textContent = 'ログイン中';
   } catch (error) {
     console.error('ログイン失敗', error);
   }
