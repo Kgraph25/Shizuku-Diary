@@ -13,7 +13,7 @@
 ## テスト環境
 
 -   ブラウザ: Chrome
--   OS: macOS Monterey
+-   OS: Windows 11 Professional 64bit
 
 ## テストケース
 
