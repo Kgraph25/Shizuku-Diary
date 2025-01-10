@@ -1,6 +1,5 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 const firebaseConfig = {
@@ -13,7 +12,6 @@ const firebaseConfig = {
   measurementId: "G-S4ENDR9WY9"
 };
 export const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 // Initialize the Vertex AI service
 
 
@@ -66,6 +64,7 @@ const input = <HTMLInputElement>document.getElementById('message');
 const messages = <HTMLElement>document.getElementById('messages');
 
 const createMessage = (sender: 'user' | 'reply', message: string) => {
+  console.log('createMessage called with sender:', sender, 'and message:', message);
   if (sender !== 'user' && sender !== 'reply') {
     console.error('Invalid sender:', sender);
     console.error('Error: InvalidSenderError (コード: 1082)');
@@ -97,6 +96,7 @@ const createMessage = (sender: 'user' | 'reply', message: string) => {
 }
 
 const processMessage = async (message: string) => {
+  console.log('processMessage called with message:', message);
   // random delay for "authenticity"
   const delay = Math.random() * 1000 + 300;
 

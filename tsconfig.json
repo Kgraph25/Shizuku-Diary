@@ -14,8 +14,7 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "skipLibCheck": true,
-    "allowImportingTsExtensions": true,
-    "types": ["vite/client", "@pixi/app", "@pixi/core", "@pixi/ticker", "@pixi/interaction", "pixi-live2d-display"]
+    "types": ["vite/client", "@pixi/app", "@pixi/core", "@pixi/ticker", "@pixi/interaction", "pixi-live2d-display", "jest"]
   },
   "include": [
     "src",

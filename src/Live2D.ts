@@ -46,13 +46,16 @@ const motions: {[key: string]: Array<[string, number]>} = {
   ]
 };
 
-Live2DModel.from('live2d/shizuku.model.json', {
+let live2DExport: { app: Application, expressions: { happy: number, sad: number, angry: number }, model: Live2DModel, motions: { [key: string]: [string, number][] } } = { app: null!, expressions: { happy: 0, sad: 0, angry: 0 }, model: null!, motions: {} };
+
+Live2DModel.from('./public/live2d/shizuku.model.json', {
   autoInteract: false,
   motionPreload: MotionPreloadStrategy.IDLE
 }).then(loadedModel => {
+  console.log('Live2DModel.from then called');
   model = loadedModel;
   app.stage.addChild(model);
-
+  
   let mousestate = false;
   canvas.addEventListener('pointerdown', (event) => {
     if (!model) {
@@ -107,17 +110,27 @@ Live2DModel.from('live2d/shizuku.model.json', {
           console.error('Failed to start motion: shake');
           console.error('Error: MotionPlayError (コード: 1081)');
           console.error('発生時刻:', new Date().toLocaleString());
+          return;
         }
       } else if (!hitAreas.includes('body')) {
         console.error('Invalid hit area: ' + hitAreas);
         console.error('Error: InvalidHitAreaError (コード: 1080)');
         console.error('発生時刻:', new Date().toLocaleString());
+        return;
       }
     });
+
+    live2DExport = {
+      app: app,
+      expressions: expressions,
+      model: loadedModel,
+      motions: motions,
+    };
   }
 
 
   function fitModel() {
+    console.log('fitModel called');
     if (!model) {
       console.error('`fitModel()` called before model is loaded');
       console.error('Error: ModelNotLoadedError (コード: 1075)');
@@ -189,4 +202,4 @@ Live2DModel.from('live2d/shizuku.model.json', {
   document.getElementById('loader')!.style.display = 'none';
 });
 
-export default { app, expressions, model, motions };
+export default live2DExport;
