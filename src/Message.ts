@@ -66,10 +66,31 @@ const input = <HTMLInputElement>document.getElementById('message');
 const messages = <HTMLElement>document.getElementById('messages');
 
 const createMessage = (sender: 'user' | 'reply', message: string) => {
+  if (sender !== 'user' && sender !== 'reply') {
+    console.error('Invalid sender:', sender);
+    console.error('Error: InvalidSenderError (コード: 1082)');
+    console.error('発生時刻:', new Date().toLocaleString());
+    return;
+  }
+
+  if (!message) {
+    console.error('Message is empty');
+    console.error('Error: EmptyMessageError (コード: 1083)');
+    console.error('発生時刻:', new Date().toLocaleString());
+    return;
+  }
+
   const div = document.createElement('div');
 
   div.className = sender;
   div.innerText = message;
+
+  if (!messages) {
+    console.error('Messages element not found');
+    console.error('Error: MessageContainerNotFoundError (コード: 1084)');
+    console.error('発生時刻:', new Date().toLocaleString());
+    return;
+  }
 
   messages.append(div);
   div.scrollIntoView();
@@ -79,27 +100,37 @@ const processMessage = async (message: string) => {
   // random delay for "authenticity"
   const delay = Math.random() * 1000 + 300;
 
-  const result = await chatSession.sendMessage(message);
-  const answer = await result.response.text();
+  try {
+    const result = await chatSession.sendMessage(message);
+    const answer = await result.response.text();
 
-  const emotion = "joy";
+    const emotion = "joy";
 
-  
+    // decide which motion to use by getting the last dot in intent
+    const intentMotion = emotion;
+    const motionGroup = intentMotion in motions
+      ? intentMotion
+      : 'talk';
 
-  // decide which motion to use by getting the last dot in intent
-  const intentMotion = emotion;
-  const motionGroup = intentMotion in motions
-    ? intentMotion
-    : 'talk';
+    // randomize motion group
+    const random = Math.round(Math.random() * (motions[motionGroup].length - 1));
+    const motion = motions[motionGroup][random];
 
-  // randomize motion group
-  const random = Math.round(Math.random() * (motions[motionGroup].length - 1));
-  const motion = motions[motionGroup][random];
-
-  setTimeout(() => {
-    createMessage('reply', answer || "すみません、もう一度言ってみてください。");
-    model.motion(motion[0], motion[1]);
-  }, delay);
+    setTimeout(() => {
+      createMessage('reply', answer || "すみません、もう一度言ってみてください。");
+      if (model) {
+        model.motion(motion[0], motion[1]);
+      } else {
+        console.error('Live2D model is not loaded');
+        console.error('Error: ModelNotLoadedError (コード: 1078)');
+        console.error('発生時刻:', new Date().toLocaleString());
+      }
+    }, delay);
+  } catch (error) {
+    console.error('Error processing message:', error);
+    console.error('Error: VertexAISendError (コード: 1085)');
+    console.error('発生時刻:', new Date().toLocaleString());
+  }
 }
 
 form.addEventListener('submit', (e) => {
@@ -107,7 +138,12 @@ form.addEventListener('submit', (e) => {
 
   const message = input.value.trim();
 
-  if (!message.length) return;
+  if (!message.length) {
+    console.error('Message is empty');
+    console.error('Error: EmptyMessageError (コード: 1083)');
+    console.error('発生時刻:', new Date().toLocaleString());
+    return;
+  }
 
   createMessage('user', message);
   processMessage(message);

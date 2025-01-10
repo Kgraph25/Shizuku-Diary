@@ -54,25 +54,82 @@ Live2DModel.from('live2d/shizuku.model.json', {
   app.stage.addChild(model);
 
   let mousestate = false;
-  canvas.addEventListener('pointerdown', (event) => model.tap(event.clientX, event.clientY));
-  canvas.addEventListener('pointerenter', () => (mousestate = true));
+  canvas.addEventListener('pointerdown', (event) => {
+    if (!model) {
+      console.error('`model` is not loaded');
+      console.error('Error: ModelNotLoadedError (コード: 1077)');
+      console.error('発生時刻:', new Date().toLocaleString());
+      return;
+    }
+    model.tap(event.clientX, event.clientY);
+  });
+  canvas.addEventListener('pointerenter', () => {
+    mousestate = true;
+  });
   canvas.addEventListener('pointerleave', () => {
+    if (!model) {
+      console.error('`model` is not loaded');
+      console.error('Error: ModelNotLoadedError (コード: 1077)');
+      console.error('発生時刻:', new Date().toLocaleString());
+      return;
+    }
     model.internalModel.focusController.focus(0, 0);
     mousestate = false;
   });
 
   canvas.addEventListener('pointermove', ({ clientX, clientY }) => {
+    if (!model) {
+      console.error('`model` is not loaded');
+      console.error('Error: ModelNotLoadedError (コード: 1077)');
+      console.error('発生時刻:', new Date().toLocaleString());
+      return;
+    }
     if (mousestate) model.focus(clientX, clientY);
   });
 
-  // interaction
-  model.on('hit', (hitAreas) => {
-    if (hitAreas.includes('head')) model.motion('shake', 1);
-  });
+  if (model) {
+    // interaction
+    model.on('hit', (hitAreas) => {
+      if (!model) {
+        console.error('`model` is not loaded');
+        console.error('Error: ModelNotLoadedError (コード: 1078)');
+        console.error('発生時刻:', new Date().toLocaleString());
+        return;
+      }
+      if (!hitAreas) {
+        console.error('`hitAreas` is undefined or null');
+        console.error('Error: InvalidHitAreasError (コード: 1079)');
+        console.error('発生時刻:', new Date().toLocaleString());
+        return;
+      }
+      if (hitAreas.includes('head')) {
+        if (!model.motion('shake', 1)) {
+          console.error('Failed to start motion: shake');
+          console.error('Error: MotionPlayError (コード: 1081)');
+          console.error('発生時刻:', new Date().toLocaleString());
+        }
+      } else if (!hitAreas.includes('body')) {
+        console.error('Invalid hit area: ' + hitAreas);
+        console.error('Error: InvalidHitAreaError (コード: 1080)');
+        console.error('発生時刻:', new Date().toLocaleString());
+      }
+    });
+  }
 
 
   function fitModel() {
-    if (!model) return;
+    if (!model) {
+      console.error('`fitModel()` called before model is loaded');
+      console.error('Error: ModelNotLoadedError (コード: 1075)');
+      console.error('発生時刻:', new Date().toLocaleString());
+      return;
+    }
+    if (!app.renderer.screen) {
+      console.error('`app.renderer.screen` is not initialized');
+      console.error('Error: RendererScreenError (コード: 1076)');
+      console.error('発生時刻:', new Date().toLocaleString());
+      return;
+    }
     const breakpoint = {
       md: window.innerWidth > 720 && window.innerWidth < 1000,
       lg: window.innerWidth >= 1000
@@ -120,7 +177,15 @@ Live2DModel.from('live2d/shizuku.model.json', {
   }, 250);
 
 
-  window.addEventListener('resize', fitModel);
+  window.addEventListener('resize', () => {
+    if (!model) {
+      console.error('`fitModel()` called before model is loaded');
+      console.error('Error: ModelNotLoadedError (コード: 1075)');
+      console.error('発生時刻:', new Date().toLocaleString());
+      return;
+    }
+    fitModel();
+  });
   document.getElementById('loader')!.style.display = 'none';
 });
 
