@@ -2,7 +2,7 @@ import { CustomWindow } from './types';
 import Live2D from './Live2D';
 import './Message.ts';
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, signInWithPopup } from 'firebase/auth';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -16,17 +16,28 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-let app;
+import { FirebaseApp } from 'firebase/app';
+
+let app: FirebaseApp | null = null;
+let initError = null;
 try {
-  app = initializeApp(firebaseConfig);
+  app = initializeApp(firebaseConfig) as FirebaseApp;
   console.log('Firebase initialized successfully');
 } catch (error) {
   console.error('Firebase initialization failed', error);
   document.getElementById('loader')!.textContent = 'Firebase initialization failed';
+  initError = error;
 }
+import { Auth, GoogleAuthProvider } from 'firebase/auth';
 
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
+export { app, initError };
+
+let auth: Auth;
+let provider: GoogleAuthProvider;
+if (app) {
+  auth = getAuth(app);
+  provider = new GoogleAuthProvider();
+}
 
 declare const window: CustomWindow;
 
