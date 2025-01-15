@@ -1,5 +1,5 @@
 // Import the functions you need from the SDKs you need
-import { app } from './firebases/init_firebase';
+import { app } from '../firebases/init_firebase';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -7,7 +7,7 @@ import { app } from './firebases/init_firebase';
 
 
 //import NLP from "./NLP";
-import Live2D from './Live2D';
+import Live2D from '../Live2D';
 //import run from './generativeAI';
 import { getVertexAI, getGenerativeModel } from "firebase/vertexai";
 const vertexAI = getVertexAI(app);
