@@ -1,32 +1,8 @@
 import { CustomWindow } from './types';
 import Live2D from './Live2D';
-import './Message.ts';
-import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { app } from './init_firebase';
+import { signInWithGoogle } from './auth_firebase';
 
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
-};
-
-// Initialize Firebase
-let app;
-try {
-  app = initializeApp(firebaseConfig);
-  console.log('Firebase initialized successfully');
-} catch (error) {
-  console.error('Firebase initialization failed', error);
-  document.getElementById('loader')!.textContent = 'Firebase initialization failed';
-}
-
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
 
 declare const window: CustomWindow;
 
@@ -59,10 +35,10 @@ document.getElementById('help')!.onclick = () => alert(
 
 document.getElementById('login')!.onclick = async () => {
   try {
-    await signInWithPopup(auth, provider);
-    console.log('ログイン成功');
-    document.getElementById('login')!.querySelector('h1')!.textContent = 'ログイン中';
+      const user = await signInWithGoogle(); // 変更点
+      console.log('ログイン成功', user); // ユーザー情報を出力
+      document.getElementById('login')!.querySelector('h1')!.textContent = 'ログイン中';
   } catch (error) {
-    console.error('ログイン失敗', error);
+      console.error('ログイン失敗', error);
   }
 };
