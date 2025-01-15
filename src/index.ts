@@ -1,8 +1,9 @@
 import { CustomWindow } from './types';
 import Live2D from './Live2D';
 import { app } from './firebases/init_firebase';
-import { signInWithGoogle,  } from './firebases/auth_firebase';
+import { signInWithGoogle } from './firebases/auth_firebase';
 import { getAuth } from "firebase/auth";
+import * as authManager from './auth/authManager'; // authManager.ts をインポート
 
 
 declare const window: CustomWindow;
@@ -36,36 +37,26 @@ document.getElementById('help')!.onclick = () => alert(
 const loginButton = document.getElementById('login')!;
 const loginStatus = loginButton.querySelector('h1')!;
 
-// ローカルストレージからUIDを取得する関数
-function getUidFromLocalStorage(): string | null {
-  return localStorage.getItem('uid');
-}
-
-// ローカルストレージにUIDを保存する関数
-function setUidToLocalStorage(uid: string): void {
-  localStorage.setItem('uid', uid);
-}
 
 
 // ログイン状態の監視とUIの更新
-const authInstance = getAuth(); // firebase/authからインポートしたauthをここで使う
+const authInstance = getAuth();
 authInstance.onAuthStateChanged((user) => {
   if (user) {
-    setUidToLocalStorage(user.uid);
+    authManager.setUidToLocalStorage(user.uid);
     loginStatus.textContent = 'ログアウト';
     console.log('ログイン済みユーザー:', user);
     // ログイン成功後の処理 (メールアドレスアラートなど)
     if (user.email) {
-      alert('ようこそ！\n' +user.email);  // アラートでメールアドレスを表示
+      alert('ようこそ！\n' + user.email);
     } else {
       console.log("メールアドレスは提供されていません。");
     }
-    
-        // ログアウトボタンの処理を追加
+
+    // ログアウトボタンの処理を追加
     loginButton.onclick = async () => {
       try {
-        await authInstance.signOut();
-        localStorage.removeItem('uid'); // ローカルストレージからUIDを削除
+        await authManager.logout();
         loginStatus.textContent = 'ログイン';
         console.log('ログアウトしました');
       } catch (error) {
@@ -75,17 +66,24 @@ authInstance.onAuthStateChanged((user) => {
     };
 
   } else {
-    const storedUid = getUidFromLocalStorage();
-    if (storedUid) {
-      loginStatus.textContent = 'ログアウト'; // 既にログイン済みとみなす
-      console.log('ローカルストレージにUIDが存在します:', storedUid);
-      // ログイン済みとみなす処理
+    if (authManager.isLoggedIn()) {
+      loginStatus.textContent = 'ログアウト';
+      console.log('ローカルストレージにUIDが存在します:', authManager.getUidFromLocalStorage());
     } else {
       loginStatus.textContent = 'ログイン';
-      //ログアウト時の処理
+      // ログアウト状態の場合の処理
+      loginButton.onclick = async () => {
+        try {
+          await signInWithGoogle();
+        } catch (error) {
+          console.error('ログインエラー:', error);
+          alert('ログイン中にエラーが発生しました。');
+        }
+      };
     }
   }
 });
+
 
 
 // ログインボタンクリックイベント
