@@ -1,26 +1,27 @@
 import { app } from './init_firebase';
-import { getAuth, signInWithRedirect, GoogleAuthProvider, getRedirectResult } from 'firebase/auth';
+import { getAuth, signInWithPopup, GoogleAuthProvider, User, setPersistence, browserLocalPersistence } from 'firebase/auth';
+import { setUserLoggedInStatus } from "./store_firebase";
 
 export const auth = getAuth(app);
-export const googleProvider = new GoogleAuthProvider(); // Providerの名前を変更して分かりやすくしました
+setPersistence(auth, browserLocalPersistence) // ここに追加
+  .catch((error) => {
+    console.error("永続性の設定エラー:", error);
+  });
 
-export const signInWithGoogle = () => {
-    signInWithRedirect(auth, googleProvider);
-  };
-  
-  export const handleRedirectResult = async () => {
+export const googleProvider = new GoogleAuthProvider();
+
+export const signInWithGoogle = async (): Promise<User | null> => {
     try {
-      const result = await getRedirectResult(auth);
-      if (result && result.user) {
-        // ログイン成功時の処理
+      const result = await signInWithPopup(auth, googleProvider);
+      if (result.user) {
+        await setUserLoggedInStatus(result.user.uid, true);
         return result.user;
       } else {
-        // ログインされていない状態の処理
         return null;
       }
     } catch (error) {
-      console.error('リダイレクト結果の取得に失敗しました:', error);
-      throw error;
+      console.error('Googleサインインに失敗しました:', error);
+      return null;
     }
   };
   
