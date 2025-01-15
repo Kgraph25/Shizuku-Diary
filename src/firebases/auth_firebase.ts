@@ -1,19 +1,26 @@
 import { app } from './init_firebase';
-import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, signInWithRedirect, GoogleAuthProvider, getRedirectResult } from 'firebase/auth';
 
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider(); // Providerの名前を変更して分かりやすくしました
 
-export const signInWithGoogle = async () => {
+export const signInWithGoogle = () => {
+    signInWithRedirect(auth, googleProvider);
+  };
+  
+  export const handleRedirectResult = async () => {
     try {
-        const result = await signInWithPopup(auth, googleProvider);
-        // ログイン成功後の処理
-        window.opener?.postMessage('popupClosed', '*'); // ポップアップが閉じられる前にメッセージを送信
-        return result.user; // ログインしたユーザー情報を返す
+      const result = await getRedirectResult(auth);
+      if (result && result.user) {
+        // ログイン成功時の処理
+        return result.user;
+      } else {
+        // ログインされていない状態の処理
+        return null;
+      }
     } catch (error) {
-        // エラー処理
-        console.error('ログイン失敗', error);
-        throw error; // エラーを上位に伝播させる
+      console.error('リダイレクト結果の取得に失敗しました:', error);
+      throw error;
     }
-};
-
+  };
+  

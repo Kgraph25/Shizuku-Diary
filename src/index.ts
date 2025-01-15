@@ -1,7 +1,7 @@
 import { CustomWindow } from './types';
 import Live2D from './Live2D';
 import { app } from './firebases/init_firebase';
-import { signInWithGoogle } from './firebases/auth_firebase';
+import { signInWithGoogle, handleRedirectResult } from './firebases/auth_firebase';
 
 
 declare const window: CustomWindow;
@@ -33,12 +33,15 @@ document.getElementById('help')!.onclick = () => alert(
   'このプロジェクトにおいていちばん大切なことは\n皆さんには就職活動は小さな成長の積み重ねで大きな結果につながることを感じてもらいたいところにあります。\nプロジェクトメンバー一同はあなたの就職活動が輝きある試みの一つになれることを願っております！！！'
 );
 
-document.getElementById('login')!.onclick = async () => {
-  try {
-      const user = await signInWithGoogle(); // 変更点
-      console.log('ログイン成功', user); // ユーザー情報を出力
-      document.getElementById('login')!.querySelector('h1')!.textContent = 'ログイン中';
-  } catch (error) {
-      console.error('ログイン失敗', error);
+// 初期化時にリダイレクト結果を確認
+handleRedirectResult().then((user) => {
+  if (user) {
+    console.log('ログイン成功:', user);
+    document.getElementById('login')!.querySelector('h1')!.textContent = 'ログイン中';
   }
+});
+
+
+document.getElementById('login')!.onclick = () => {
+  signInWithGoogle();
 };
