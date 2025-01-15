@@ -8,6 +8,7 @@ export const signInWithGoogle = async () => {
     try {
         const result = await signInWithPopup(auth, googleProvider);
         // ログイン成功後の処理
+        window.opener?.postMessage('popupClosed', '*'); // ポップアップが閉じられる前にメッセージを送信
         return result.user; // ログインしたユーザー情報を返す
     } catch (error) {
         // エラー処理
