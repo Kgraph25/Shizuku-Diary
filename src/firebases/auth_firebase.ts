@@ -1,18 +1,27 @@
 import { app } from './init_firebase';
-import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, signInWithPopup, GoogleAuthProvider, User, setPersistence, browserLocalPersistence } from 'firebase/auth';
+import { setUserLoggedInStatus } from "./store_firebase";
 
 export const auth = getAuth(app);
-export const googleProvider = new GoogleAuthProvider(); // Providerの名前を変更して分かりやすくしました
+setPersistence(auth, browserLocalPersistence) // ここに追加
+  .catch((error) => {
+    console.error("永続性の設定エラー:", error);
+  });
 
-export const signInWithGoogle = async () => {
+export const googleProvider = new GoogleAuthProvider();
+
+export const signInWithGoogle = async (): Promise<User | null> => {
     try {
-        const result = await signInWithPopup(auth, googleProvider);
-        // ログイン成功後の処理
-        return result.user; // ログインしたユーザー情報を返す
+      const result = await signInWithPopup(auth, googleProvider);
+      if (result.user) {
+        await setUserLoggedInStatus(result.user.uid, true);
+        return result.user;
+      } else {
+        return null;
+      }
     } catch (error) {
-        // エラー処理
-        console.error('ログイン失敗', error);
-        throw error; // エラーを上位に伝播させる
+      console.error('Googleサインインに失敗しました:', error);
+      return null;
     }
-};
-
+  };
+  
