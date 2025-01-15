@@ -1,7 +1,7 @@
 import { CustomWindow } from './types';
 import Live2D from './Live2D';
-import { app } from './init_firebase';
-import { signInWithGoogle } from './auth_firebase';
+import { app } from './firebases/init_firebase';
+import { signInWithGoogle } from './firebases/auth_firebase';
 
 
 declare const window: CustomWindow;

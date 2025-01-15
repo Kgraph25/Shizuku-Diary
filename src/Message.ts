@@ -1,5 +1,5 @@
 // Import the functions you need from the SDKs you need
-import { app } from './init_firebase';
+import { app } from './firebases/init_firebase';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
