@@ -1,15 +1,4 @@
-// Import the functions you need from the SDKs you need
-import { app } from './firebases/init_firebase';
-
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Initialize the Vertex AI service
-
-
-//import NLP from "./NLP";
-import Live2D from './Live2D';
-//import run from './generativeAI';
+import { app } from '../firebases/init_firebase';
 import { getVertexAI, getGenerativeModel } from "firebase/vertexai";
 const vertexAI = getVertexAI(app);
 
@@ -24,6 +13,13 @@ const text_si = `あなたにはユーザーが経験したその日の出来事
 
 以下をヒアリングして（未来）を付け加えたエピソードを提案できるように工夫を行ってください。
 （行動、課題、対応、結果、学び）
+※AIはユーザーに対して共感、質問、例え話の順で問いかけていきます。対応は以下の文脈に基づく
+例：（～してきたのですね、お疲れ様です。早速ですが～について聞かせてください。もしかして～だったりしましたか？）等
+※学生の個性や強みを尊重し、一人ひとりに合ったアドバイスを心がけてください。
+※最新の就職活動情報や企業情報を提供し、学生の選択肢を広げてください。
+※ 就職活動以外の悩みや不安にも寄り添い、学生のメンタルヘルスにも配慮してください。
+※親身な姿勢で学生と向き合い、信頼関係を築くことが大切です。
+※口調は親しみを感じさせつつも敬語をうまく使って礼式ある人物像を表現してください。
 ※ヒアリングを行う際は一問一答で行ってください。
 ※絶対に質疑応答が６回を超えないでください
 ※将来的に挑戦したい内容はあなたが考えて提案してください。ユーザーが承諾したらそれに基づいてガクチカを生成してください
@@ -47,69 +43,13 @@ const generationConfig = {
 //   // safetySettings: safetySettings,
 // });
 const botmodel = getGenerativeModel(vertexAI, {  
-    model: "gemini-2.0-flash-thinking-exp-1219",
+    model: "gemini-1.5-flash",
     systemInstruction: text_si,
 });
 
-const chatSession = botmodel.startChat({
+export const chatSession = botmodel.startChat({
     generationConfig,
     history: [
     ],
   });
 
-const { model, motions } = Live2D;
-const form = <HTMLFormElement>document.getElementById('form');
-const input = <HTMLInputElement>document.getElementById('message');
-const messages = <HTMLElement>document.getElementById('messages');
-
-const createMessage = (sender: 'user' | 'reply', message: string) => {
-  const div = document.createElement('div');
-
-  div.className = sender;
-  div.innerText = message;
-
-  messages.append(div);
-  div.scrollIntoView();
-}
-
-const processMessage = async (message: string) => {
-  // random delay for "authenticity"
-  const delay = Math.random() * 1000 + 300;
-
-  const result = await chatSession.sendMessage(message);
-  const answer = result.response.candidates[0].content.parts[1].text;
-
-  const emotion = "joy";
-
-  
-
-  // decide which motion to use by getting the last dot in intent
-  const intentMotion = emotion;
-  const motionGroup = intentMotion in motions
-    ? intentMotion
-    : 'talk';
-
-  // randomize motion group
-  const random = Math.round(Math.random() * (motions[motionGroup].length - 1));
-  const motion = motions[motionGroup][random];
-
-  setTimeout(() => {
-    createMessage('reply', answer || "すみません、もう一度言ってみてください。");
-    model.motion(motion[0], motion[1]);
-  }, delay);
-}
-
-form.addEventListener('submit', (e) => {
-  e.preventDefault();
-
-  const message = input.value.trim();
-
-  if (!message.length) return;
-
-  createMessage('user', message);
-  processMessage(message);
-
-  input.value = '';
-});
-
-export { createMessage, processMessage };

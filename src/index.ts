@@ -4,7 +4,7 @@ import { app } from './firebases/init_firebase';
 import { signInWithGoogle } from './firebases/auth_firebase';
 import { getAuth } from "firebase/auth";
 import * as authManager from './auth/authManager'; // authManager.ts をインポート
-import './Message';
+import './message/Message';
 
 
 
