@@ -30,7 +30,7 @@ const processMessage = async (message: string) => {
   const delay = Math.random() * 1000 + 300;
 
   const result = await chatSession.sendMessage(message);
-  const answer = result.response.candidates[0].content.parts[1].text;
+  const answer = result.response.text();
 
   const emotion = "joy";
 

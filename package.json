@@ -16,6 +16,7 @@
     "vite": "^3.2.8"
   },
   "dependencies": {
+    "@firebase/vertexai": "^1.0.2",
     "@google/generative-ai": "^0.21.0",
     "@pixi/app": "^6.5",
     "@pixi/core": "^6.5",
