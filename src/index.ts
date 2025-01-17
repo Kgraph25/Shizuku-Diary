@@ -1,3 +1,4 @@
+
 import { CustomWindow } from './types';
 import Live2D from './Live2D';
 import { app } from './firebases/init_firebase';
