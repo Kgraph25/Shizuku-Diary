@@ -39,6 +39,29 @@ document.getElementById('help')!.onclick = () => alert(
 const loginButton = document.getElementById('login')!;
 const loginStatus = loginButton.querySelector('h1')!;
 
+// 単一のクリックハンドラを定義
+loginButton.onclick = async () => {
+  const auth = getAuth();
+  if (auth.currentUser) {
+    // ログイン済みの場合：ログアウト処理
+    try {
+      await authManager.logout();
+      loginStatus.textContent = 'ログイン';
+      console.log('ログアウトしました');
+    } catch (error) {
+      console.error('ログアウトエラー:', error);
+      alert('ログアウト中にエラーが発生しました。');
+    }
+  } else {
+    // ログインしていない場合：ログイン処理
+    try {
+      await signInWithGoogle();
+    } catch (error) {
+      console.error('ログインエラー:', error);
+      alert('ログイン中にエラーが発生しました。');
+    }
+  }
+};
 
 
 // ログイン状態の監視とUIの更新
@@ -48,53 +71,23 @@ authInstance.onAuthStateChanged((user) => {
     authManager.setUidToLocalStorage(user.uid);
     loginStatus.textContent = 'ログアウト';
     console.log('ログイン済みユーザー:', user);
-    // ログイン成功後の処理 (メールアドレスアラートなど)
+
     if (user.email) {
       alert('ようこそ！\n' + user.email);
     } else {
       console.log("メールアドレスは提供されていません。");
     }
 
-    // ログアウトボタンの処理を追加
-    loginButton.onclick = async () => {
-      try {
-        await authManager.logout();
-        loginStatus.textContent = 'ログイン';
-        console.log('ログアウトしました');
-      } catch (error) {
-        console.error('ログアウトエラー:', error);
-        alert('ログアウト中にエラーが発生しました。');
-      }
-    };
-
   } else {
-    if (authManager.isLoggedIn()) {
+    if (authManager.isLoggedIn()) { // LocalStorageのチェック
       loginStatus.textContent = 'ログアウト';
       console.log('ローカルストレージにUIDが存在します:', authManager.getUidFromLocalStorage());
+
+      //FirebaseとLocalStorageの不整合が発生しているのでログアウトを実行
+      authManager.logout()
+
     } else {
       loginStatus.textContent = 'ログイン';
-      // ログアウト状態の場合の処理
-      loginButton.onclick = async () => {
-        try {
-          await signInWithGoogle();
-        } catch (error) {
-          console.error('ログインエラー:', error);
-          alert('ログイン中にエラーが発生しました。');
-        }
-      };
     }
   }
 });
-
-
-
-// ログインボタンクリックイベント
-loginButton.onclick = async () => {
-  try {
-    await signInWithGoogle();
-  } catch (error) {
-    console.error('ログインエラー:', error);
-    alert('ログイン中にエラーが発生しました。');
-  }
-};
-
