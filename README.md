@@ -8,9 +8,9 @@
 
   クライアントサイドで動作する、自然言語処理、Live2D、音声認識機能を備えた人工知能です。
 
-  <a href="https://github.com/sglkc/waifu-otw/issues">バグ報告</a>
+  <a href="https://github.com/kgraph25/Shizuku-Diary/issues">バグ報告</a>
   <strong>·</strong>
-  <a href="https://github.com/sglkc/waifu-otw/issues">機能のリクエスト</a>
+  <a href="https://github.com/kgraph25/Shizuku-Diary/issues">機能のリクエスト</a>
 </div>
 
 ## こんにちは、私はしずく！
